@@ -1,71 +1,14 @@
 #install.packages("remotes")
-#install.packages("js")
-#install.packages("nnet")
-# install.packages("pls")
-#install.packages("ggplot2")
-#install.packages("R.utils")
-#install.packages("mdatools")
-#install.packages("data.table")
-#install.packages("ChemoSpec")
-#install.packages("prospectr")
-##install.packages("amap")
-#install.packages("rgl")
-
-#install.packages("FNN")
-#install.packages("signal")
-#install.packages("caret")
-#install.packages("dplyr")
-#install.packages("remotes")
 #install.packages("rchemo")
-
-
-
-#install.packages("xgboost")
-
 #remotes::install_github("mlesnoff/rchemo", dependencies = TRUE, build_vignettes = TRUE)
 
 library(psych)
-#library(dplyr)
-#library(pls)
-#library(nnet)
-#library(js)
-#library(ChemoSpec)
-#library(R.utils)
-#library(ggplot2)
-#library(prospectr)
 library(mt)
-
-
-#library(amap)
-#library(rgl)
-#library(mdatools)
-
-#library (data.table)
-#library(remotes)
-
-
-#library(FNN)
-#library(signal)
-#library(e1071)
-#library(caret)
-#library(dplyr)
-
 library(rchemo)
-#library(stats)
-#library(mt)
-#library("readxl")
-#library(mvoutlier)
-#library(tsne)
-
-#library(faoutlier)
 library(kernlab)
 library(rrcovHD)
-#library(solitude)
 library(isotree)
-#library(kernlab)
 
-
-warning=FALSE
 ## This code is made to create different tables with different outlier detection techniques
 ##Set working directory
 
