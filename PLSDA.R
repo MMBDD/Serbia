@@ -1,0 +1,384 @@
+install.packages("remotes")
+install.packages("js")
+install.packages("nnet")
+install.packages("pls")
+install.packages("ggplot2")
+install.packages("R.utils")
+install.packages("mdatools")
+install.packages("data.table")
+install.packages("ChemoSpec")
+install.packages("prospectr")
+install.packages("amap")
+install.packages("rgl")
+
+install.packages("FNN")
+install.packages("signal")
+install.packages("caret")
+install.packages("dplyr")
+install.packages("remotes")
+install.packages("rchemo")
+
+install.packages("xgboost")
+
+remotes::install_github("mlesnoff/rchemo", dependencies = TRUE, build_vignettes = TRUE)
+
+
+library(dplyr)
+library(pls)
+library(nnet)
+library(js)
+library(ChemoSpec)
+library(R.utils)
+library(ggplot2)
+library(prospectr)
+library(mt)
+
+
+library(amap)
+library(rgl)
+library(mdatools)
+
+library (data.table)
+library(remotes)
+
+
+library(FNN)
+library(signal)
+library(e1071)
+library(caret)
+library(dplyr)
+
+library(rchemo)
+library(stats)
+library(mt)
+
+
+
+
+
+
+#Global Model with all varieties together
+
+file1= "BRIOSOready.csv"
+file2="Labelsbrioso.csv"
+
+file3 = "Imagen1y2.csv"
+file4="YlabelsCappriccia2.csv"
+
+file5 = "XProvine.csv"
+file6="LabelsProvine.csv"
+
+# Import Brioso
+
+XBI=read.csv(file1, row.names=1, check.names = FALSE)
+
+XB=XBI[,4:115]
+row_names_df_to_remove1<-c("2599", "4038", "983", "3222", "3955", "3651", "440", "5160")
+YB=read.csv(file2, row.names=1)
+YB=as.data.frame(YB[,12]) 
+joinB=cbind(XB,YB)
+joinB=(joinB[!(row.names(joinB) %in% row_names_df_to_remove1),])
+XB=joinB[,1:112]
+YB=as.data.frame(joinB[,113])
+
+#Import Cappricia
+
+XC=read.csv(file3, row.names=1, check.names = FALSE)
+row_names_df_to_remove<-c("i2T11S5", "i2T5S3", "i1T1S3", "i1T1S2")
+row_names_df_to_remover<-c("i1T1S3", "i1T1S2")
+YC=read.csv(file4, row.names=1)
+YC=as.data.frame(YC[,12]) 
+joinC=cbind(XC,YC)
+joinC=as.data.frame(joinC[!(row.names(joinC) %in% row_names_df_to_remove),])
+joinC=as.data.frame(joinC[!(row.names(joinC) %in% row_names_df_to_remover),])
+XC=joinC[,1:112]
+YC=as.data.frame(joinC[,113])
+
+#Import Provine
+
+XP=read.csv(file5, row.names=1, check.names = FALSE)
+XP=XP[,4:115]
+YP=read.csv(file6, row.names=1)
+YP=as.data.frame(YP[,11]) 
+joinP=cbind(XP,YP)
+row_names_df_to_remove2<-c("7790", "9639", "0", "7232","10340", "1002", "4117")
+joinP=joinP[!(row.names(joinP) %in% row_names_df_to_remove2),]
+XP=joinP[,1:112]
+YP=as.data.frame(joinP[,113])
+
+#Write the same column names for every matrix
+
+
+colnames(XC)=colnames(XB)
+colnames(XP)= colnames(XB)
+colnames(XC)=colnames(XP)
+colnames(YC)=colnames(YP)
+
+colnames(YB)="Class"
+colnames(YC)="Class"
+colnames(YP)="Class"
+
+# Build one data set by combining two differente varieties together
+
+X=rbind(XC, XP)
+
+Y=rbind(YC,YP)
+
+# Apply pretreatments
+
+# Standar Normal Variate (SNV)
+
+snv=as.data.frame(snv(X))
+
+# First or Second Derivative
+
+SGC=as.data.frame(savgol(snv,2,17,2))
+
+# Detrend 
+
+
+wav <- as.numeric(colnames(X))
+DT=detrend(X, wav, p = 2)
+
+# Plot Spectra
+
+# You can plot Raw Spectra, or pretreated spectra
+
+
+## Plots
+
+par(mar = c(6, 6, 6, 6))
+
+col  = "red"
+
+plotsp(snv, ylab = "Measured Reflectance",xlab = "Wavelength (nm)",type = "l", col = col, zeroes = FALSE, labels = FALSE, add = FALSE)
+
+title(main = " SNV NIR spectra",line = NA, outer = FALSE)
+
+
+#Join  X and Y to build only one table 
+
+join=cbind(Y,X)
+row_names_df_to_remove<-c("2599")
+join=join[!(row.names(join) %in% row_names_df_to_remove),]
+nv=112
+
+
+#Split dataset 70/30 in a representative way for each class
+
+JoinSepals<- split(join, join$Class)
+
+xtrain = data.frame()
+
+ytrain =as.integer()
+xtest = data.frame()
+ytest=as.integer()
+
+
+for (class in JoinSepals)
+{
+  
+  
+  dt = sort(sample(nrow(class), nrow(class)*.7))
+  train<-class[dt,]
+  test<-class[-dt,]
+  
+  tmpxtrain = train[,2:(nv+1)]
+  xtrain= rbind(xtrain,tmpxtrain)
+  tmpytrain =  train[,1]
+  ytrain=append (ytrain, tmpytrain)
+  
+  tmpxtest = test[,2:(nv+1)]
+  xtest =  rbind(xtest,tmpxtest)
+  tmpytest =  test[,1]
+  ytest = append(ytest,tmpytest)
+  
+}
+
+
+
+## According to the optimal model found previously, we select the most important variables by CovSel
+
+  i =33
+  nvar = i
+  vs=(covsel(xtrain, ytrain, nvar, scaly = TRUE, weights = NULL))
+  variables=vs$sel[1]
+  variables[1]
+  
+  
+## We build the matrix with the important variables found by CovSel
+  v <- unlist(variables)
+  v = sort(v)
+  CovSelTrain =xtrain[,c(v)]
+  CovSelTest =xtest[,c(v)]
+  
+  
+  
+#PLSDA modeling  
+## Split TRAINING SET into VALIDATION AND TUNING, in order to choose the number of latent variables
+#Please, add the optimal number of samples belonging to the Training set in  indices
+  
+  OneTable= cbind(CovSelTrain,ytrain)
+  
+  noseparo = TRUE 
+  while (noseparo)
+  { 
+    indices= sample(223, 40)
+    
+    validation =  OneTable[indices,]
+    tuning  =  OneTable[-indices,]   
+    
+    Yvalidation=validation[,(nvar+1)]                    
+    Xvalidation=validation[,-(nvar+1)]                
+    
+    
+    Ytuning=tuning[,(nvar+1)]                    
+    Xtuning=tuning[,-(nvar+1)] 
+    
+    
+    ## Train a PLSDA model 
+    
+    m <- 50 ; p <- 8
+    
+    nlv <- nvar-1
+    res <- gridscorelv(Xvalidation, Yvalidation, Xtuning, Ytuning, score = err,fun = plsrda,nlv = 1:nlv, verb = TRUE)
+    
+    
+    plotscore(res$nlv, res$y1,main = "ERR", xlab = "Nb. LVs", ylab = "Value")
+    u<- res[res$y1 == min(res$y1), ][1, , drop = FALSE]
+    ytrain=as.data.frame(ytrain)
+    YTrainInteger = as.integer(ytrain[,1])
+    
+    
+    fmD <- plsrda(CovSelTrain,  YTrainInteger, nlv = u$nlv)
+    
+    pred <- predict(fmD, CovSelTest)$pred
+    noseparo = (var(pred) == 0)
+    
+    
+  }
+  
+  d=fmD$fm
+  plot(d$P)
+  plot(d$T)
+  
+  
+  #The optimal number of latent variables was chosen according to the lower error in prediction
+  #With 33 initial variables, the optimal value of latent variables is 19
+  
+  NumberofLatentVariables=u$nlv
+  NumberofLatentVariables
+  
+  mx=as.matrix(ytest)
+  
+  
+  ###### Now we can see the Results of the Predictions
+  
+  mx=as.matrix(ytest)
+  class(pred)
+  tab1=table(pred, mx)
+  
+  
+  ###### Results in Validation
+  
+  
+  re1=confusionMatrix(tab1)
+  
+  re1
+  
+  ###### Confusion matrix
+  
+  as.table(re1)
+  
+  as.matrix(re1)
+  
+  ###### Classification parameters
+  
+  t=as.matrix(re1, what="overall")
+  t
+  e=as.matrix(re1, what="classes")
+  e
+  
+  ###### Summary of classification parameters
+  
+  ComparativeTable=as.data.frame(c(t[1], e[1], e[2], e[5], e[11]))
+  
+  rownames(ComparativeTable) <- c("Accuracy", "Sensitivity", "Specificity", "Precision", "Balanced accuracy") 
+  
+  ComparativeTable
+
+
+  ###### Export results to a project folder
+
+  write.csv(e, "c:/temp/OPT/Workshop.csv")
+
+
+
+###############################################################################################################
+ 
+  
+  #Let's try another library: mdatatools
+  
+  library(mdatools)
+  
+
+  
+  ######################################################################################################
+  
+  
+  colnames(xtrain)=as.character(colnames(xtrain))
+  
+  colnames(xtest)=as.character(colnames(xtest))
+  
+  ytrain=as.data.frame(ytrain)
+  row.names(xtrain)=row.names(ytrain)
+  
+  ytest=as.data.frame(ytest)
+  row.names(xtest)=row.names(ytest)
+  
+  ytrain$ytrain<- with(ytrain, factor(ytrain, levels = 0:1, labels = c("Healthy", "Diseased")))
+ 
+  ytest$ytest<- with(ytest, factor(ytest, levels = 0:1, labels = c("Healthy", "Diseased")))
+  
+  ytr=as.factor(ytrain$ytrain)
+ 
+
+  m.all = plsda(xtrain, ytr, ncomp = min(nrow(xtrain) - 1, ncol(xtrain), 20), cv = 1)
+  
+  summary(m.all$model, nc = 1)
+  
+  # I can not find calres 
+  
+  getConfusionMatrix(m.all$calres)  #I can not find similar information to calres in my model
+  
+  
+  par(mfrow = c(1, 2))
+  plotPredictions(m.all)
+  
+  # Error in UseMethod("plotPredictions") : 
+ # no applicable method for 'plotPredictions' applied to an object of class "c('plsda', 'mvr')"
+  
+  
+  
+  
+  ### compare with his data
+  data(iris)
+  
+  cal.ind = c(1:25, 51:75, 101:125)
+  val.ind = c(26:50, 76:100, 126:150)
+  
+  Xc = iris[cal.ind, 1:4]
+  Xv = iris[val.ind, 1:4]
+  
+  cc.all = iris[cal.ind, 5]
+  cv.all = iris[val.ind, 5]
+
+  
+  m.all = plsda(Xc, cc.all, 3, cv = 1)  
+  plotPredictions(m.all)
+  
+  # I see the same error with the example data
+  # Error in UseMethod("plotPredictions") : 
+  #no applicable method for 'plotPredictions' applied to an object of class "c('plsda', 'mvr')"
+  
+  
