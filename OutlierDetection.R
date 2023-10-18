@@ -20,7 +20,7 @@ setwd("C:/Users/berto011/OneDrive - Wageningen University & Research/Proyectos/A
 
 
 ##Import data. Please choose from varieties "Cappricia, Brioso, and Provine"
-file = "capricia_raw_comma.csv"
+file = "Cappricia.csv"
 #file= "Brioso.csv"
 #file="Provine.csv"
 

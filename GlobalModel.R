@@ -13,14 +13,14 @@ setwd("C:/temp/ICNIRS/ICNIRS/'GlobalModel")
 # Import datasets, each data set should have only one spectrum per sepal
 # First use the Code  "OutlierDetection.R", to build averaged data sets for each varieties
 
-file1= "BRIOSOready.csv"
-file2="Labelsbrioso.csv"
+file1= "BRIOSOa.csv"
+file2="BRIOSOb.csv"
 
-file3 = "Imagen1y2.csv"
-file4="YlabelsCappriccia2.csv"
+file3 = "CAPPRICIAa.csv"
+file4="CAPPRICIAb.csv"
 
-file5 = "XProvine.csv"
-file6="LabelsProvine.csv"
+file5 = "PROVINEa.csv"
+file6="PROVINEb.csv"
 
 # Import Table
 XB=read.csv(file1, row.names=1, check.names=FALSE)
