@@ -9,7 +9,7 @@ library(rchemo)
 #Global Model, combining two or three varieties together.
 #Set working directory
 
-setwd("C:/temp/ICNIRS/ICNIRS/'GlobalModel")
+setwd("C:/work/Mercedes/Serbia1024/Serbia/Data")
 # Import datasets, each data set should have only one spectrum per sepal
 # First use the Code  "OutlierDetection.R", to build averaged data sets for each varieties
 
