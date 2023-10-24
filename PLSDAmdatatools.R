@@ -1,15 +1,18 @@
 library(mdatools)
+library(pcv)
+
 
 #Global Model with all varieties together
 
-file1= "BRIOSOready.csv"
-file2 = "Labelsbrioso.csv"
+file1= "BRIOSOa.csv"
+file2="BRIOSOb.csv"
 
-file3 = "Imagen1y2.csv"
-file4 = "YlabelsCappriccia2.csv"
+file3 = "CAPPRICIAa.csv"
+file4="CAPPRICIAb.csv"
 
-file5 = "XProvine.csv"
-file6 = "LabelsProvine.csv"
+file5 = "PROVINEa.csv"
+file6="PROVINEb.csv"
+
 
 # Import Brioso
 
@@ -169,7 +172,6 @@ plotSensitivity(S, show.labels = TRUE)
 plotMisclassified(S, show.labels = TRUE)
 plotPredictions(S, show.labels = TRUE)
 
-library(pcv)
 Xpv = pcvpca(as.matrix(xtrain), 4, center = TRUE, scale = TRUE, cv = list("ven", 4))
 
 

@@ -1,72 +1,20 @@
-install.packages("remotes")
-install.packages("js")
-install.packages("nnet")
-install.packages("pls")
-install.packages("ggplot2")
-install.packages("R.utils")
-install.packages("mdatools")
-install.packages("data.table")
-install.packages("ChemoSpec")
-install.packages("prospectr")
-install.packages("amap")
-install.packages("rgl")
-
-install.packages("FNN")
-install.packages("signal")
-install.packages("caret")
-install.packages("dplyr")
-install.packages("remotes")
-install.packages("rchemo")
-
-install.packages("xgboost")
-
-remotes::install_github("mlesnoff/rchemo", dependencies = TRUE, build_vignettes = TRUE)
-
-
-library(dplyr)
-library(pls)
-library(nnet)
-library(js)
-library(ChemoSpec)
-library(R.utils)
-library(ggplot2)
 library(prospectr)
-library(mt)
-
-
-library(amap)
-library(rgl)
-library(mdatools)
-
-library (data.table)
-library(remotes)
-
-
-library(FNN)
-library(signal)
-library(e1071)
 library(caret)
-library(dplyr)
-
 library(rchemo)
-library(stats)
-library(mt)
-
-
-
-
 
 
 #Global Model with all varieties together
 
-file1= "BRIOSOready.csv"
-file2="Labelsbrioso.csv"
 
-file3 = "Imagen1y2.csv"
-file4="YlabelsCappriccia2.csv"
+file1= "BRIOSOa.csv"
+file2="BRIOSOb.csv"
 
-file5 = "XProvine.csv"
-file6="LabelsProvine.csv"
+file3 = "CAPPRICIAa.csv"
+file4="CAPPRICIAb.csv"
+
+file5 = "PROVINEa.csv"
+file6="PROVINEb.csv"
+
 
 # Import Brioso
 
@@ -314,71 +262,6 @@ for (class in JoinSepals)
 
 
 
-###############################################################################################################
- 
-  
-  #Let's try another library: mdatatools
-  
-  library(mdatools)
-  
 
-  
-  ######################################################################################################
-  
-  
-  colnames(xtrain)=as.character(colnames(xtrain))
-  
-  colnames(xtest)=as.character(colnames(xtest))
-  
-  ytrain=as.data.frame(ytrain)
-  row.names(xtrain)=row.names(ytrain)
-  
-  ytest=as.data.frame(ytest)
-  row.names(xtest)=row.names(ytest)
-  
-  ytrain$ytrain<- with(ytrain, factor(ytrain, levels = 0:1, labels = c("Healthy", "Diseased")))
- 
-  ytest$ytest<- with(ytest, factor(ytest, levels = 0:1, labels = c("Healthy", "Diseased")))
-  
-  ytr=as.factor(ytrain$ytrain)
- 
-
-  m.all = plsda(xtrain, ytr, ncomp = min(nrow(xtrain) - 1, ncol(xtrain), 20), cv = 1)
-  
-  summary(m.all$model, nc = 1)
-  
-  # I can not find calres 
-  
-  getConfusionMatrix(m.all$calres)  #I can not find similar information to calres in my model
-  
-  
-  par(mfrow = c(1, 2))
-  plotPredictions(m.all)
-  
-  # Error in UseMethod("plotPredictions") : 
- # no applicable method for 'plotPredictions' applied to an object of class "c('plsda', 'mvr')"
-  
-  
-  
-  
-  ### compare with his data
-  data(iris)
-  
-  cal.ind = c(1:25, 51:75, 101:125)
-  val.ind = c(26:50, 76:100, 126:150)
-  
-  Xc = iris[cal.ind, 1:4]
-  Xv = iris[val.ind, 1:4]
-  
-  cc.all = iris[cal.ind, 5]
-  cv.all = iris[val.ind, 5]
-
-  
-  m.all = plsda(Xc, cc.all, 3, cv = 1)  
-  plotPredictions(m.all)
-  
-  # I see the same error with the example data
-  # Error in UseMethod("plotPredictions") : 
-  #no applicable method for 'plotPredictions' applied to an object of class "c('plsda', 'mvr')"
   
   
