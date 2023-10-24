@@ -12,7 +12,7 @@ library(isotree)
 ## This code is made to create different tables with different outlier detection techniques
 ##Set working directory
 
-setwd("C:/Users/berto011/OneDrive - Wageningen University & Research/Proyectos/ANTARES-TOMATES/Cappricia/ANTARES-TOMATES")
+#setwd("C:/Users/berto011/OneDrive - Wageningen University & Research/Proyectos/ANTARES-TOMATES/Cappricia/ANTARES-TOMATES")
 
 # The aim of this R code is to remove outliers at pixel level and to average the remaining inliers
 # This code was created to build one single file where each row is one sepal
@@ -86,14 +86,18 @@ for (image in Images)
         outliers = which(outliersTmp %in% 0)
       }else if (ODMethod =="PCDIST")
       {
-        obj <- OutlierPCDist(SepalData)
+        suppressWarnings({ 
+          obj <- OutlierPCDist(SepalData)
+        })
         outliers = which(getFlag(obj) %in% 0)
         getCutoff(obj)
       }
       
       else if (ODMethod=="SIMCA")
       {
-        obj <- OutlierPCDist(SepalData)
+        suppressWarnings({ 
+          obj <- OutlierPCDist(SepalData)
+        })
         outliers = which(getFlag(obj) %in% 0)
         if (length(outliers)>0 )
         {
@@ -219,7 +223,6 @@ for (image in Images)
 # Export the Result table
 # Please, write the file name in accordance to the methods you have chosen
 # Save the results in a project folder
-
 
 write.csv(dfResults, "c:/temp/pruebaNN.csv")
 
