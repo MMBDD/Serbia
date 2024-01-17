@@ -38,6 +38,9 @@ YB=read.csv(file2, row.names=1)
 #Select column related to Label Scenario 2
 YB=as.data.frame(YB[,12]) 
 
+
+
+
 # Before removing outliers, join X and Y in order to remove the same samples from both datasets
 joinB=cbind(XB,YB)
 
@@ -282,23 +285,6 @@ write.csv(results, "c:/temp/OPT/resultsNN.csv")
 # Change pretreatments and run the code again
 
 # Change data sets and run the code again
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

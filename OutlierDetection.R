@@ -8,6 +8,15 @@ library(rchemo)
 library(kernlab)
 library(rrcovHD)
 library(isotree)
+library(mdatools)
+install.packages("RSIMCA")
+
+if(!require('rrcovHD')) {
+  install.packages('rrcovHD')
+  library('rrcovHD')
+
+
+
 
 ## This code is made to create different tables with different outlier detection techniques
 ##Set working directory
@@ -106,7 +115,7 @@ for (image in Images)
         {
           SepalDataNoOut = SepalData
         }
-        SIMCA=RSimca(SepalDataNoOut)
+        SIMCA=RSimca(SepalDataNoOut,)
 
         pr <- predict(SIMCA, newdata=SepalData)
         SIMCA@pcaobj

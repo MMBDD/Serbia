@@ -23,7 +23,7 @@ XBI=read.csv(file1, row.names=1, check.names = FALSE)
 XB=XBI[,4:115]
 row_names_df_to_remove1<-c("2599", "4038", "983", "3222", "3955", "3651", "440", "5160")
 YB=read.csv(file2, row.names=1)
-YB=as.data.frame(YB[,12]) 
+YB=as.data.frame(YB[,11]) 
 joinB=cbind(XB,YB)
 joinB=(joinB[!(row.names(joinB) %in% row_names_df_to_remove1),])
 XB=joinB[,1:112]
@@ -35,7 +35,7 @@ XC=read.csv(file3, row.names=1, check.names = FALSE)
 row_names_df_to_remove<-c("i2T11S5", "i2T5S3", "i1T1S3", "i1T1S2")
 row_names_df_to_remover<-c("i1T1S3", "i1T1S2")
 YC=read.csv(file4, row.names=1)
-YC=as.data.frame(YC[,12]) 
+YC=as.data.frame(YC[,11]) 
 joinC=cbind(XC,YC)
 joinC=as.data.frame(joinC[!(row.names(joinC) %in% row_names_df_to_remove),])
 joinC=as.data.frame(joinC[!(row.names(joinC) %in% row_names_df_to_remover),])
@@ -66,11 +66,18 @@ colnames(YB)="Class"
 colnames(YC)="Class"
 colnames(YP)="Class"
 
-# Build one data set by combining two differente varieties together
+# Build one data set by combining two different varieties together
+
 
 X=rbind(XC, XP)
 
 Y=rbind(YC,YP)
+row.names(Y)=row.names(X)
+snv=as.data.frame(snv(X))
+
+#First or Second Derivative, to SNV or to raw data
+SGC=as.data.frame(savgol(snvC,2,17,2))
+
 
 # Apply pretreatments
 
@@ -106,7 +113,7 @@ title(main = " SNV NIR spectra",line = NA, outer = FALSE)
 
 #Join  X and Y to build only one table 
 
-join=cbind(Y,X)
+join=cbind(Y,SGC)
 row_names_df_to_remove<-c("2599")
 join=join[!(row.names(join) %in% row_names_df_to_remove),]
 nv=112
@@ -147,7 +154,7 @@ for (class in JoinSepals)
 
 ## According to the optimal model found previously, we select the most important variables by CovSel
 
-  i =33
+  i =6
   nvar = i
   vs=(covsel(xtrain, ytrain, nvar, scaly = TRUE, weights = NULL))
   variables=vs$sel[1]
@@ -169,9 +176,10 @@ for (class in JoinSepals)
   OneTable= cbind(CovSelTrain,ytrain)
   
   noseparo = TRUE 
-  while (noseparo)
+  #while (noseparo)
   { 
-    indices= sample(223, 40)
+    
+    indices= sample(nrow(CovSelTrain), nrow(CovSelTrain) *0.30)
     
     validation =  OneTable[indices,]
     tuning  =  OneTable[-indices,]   
@@ -182,8 +190,11 @@ for (class in JoinSepals)
     
     Ytuning=tuning[,(nvar+1)]                    
     Xtuning=tuning[,-(nvar+1)] 
-    
-    
+    #
+    Ytuning=as.data.frame(Ytuning)
+    #row.names(Ytuning)=row.names(Xtuning)
+    #Yvalidation=as.data.frame(Yvalidation)
+    #row.names(Yvalidation)=row.names(Xvalidation)
     ## Train a PLSDA model 
     
     m <- 50 ; p <- 8
@@ -226,7 +237,7 @@ for (class in JoinSepals)
   class(pred)
   tab1=table(pred, mx)
   
-  
+  tab1
   ###### Results in Validation
   
   
