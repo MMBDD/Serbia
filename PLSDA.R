@@ -73,10 +73,16 @@ X=rbind(XC, XP)
 
 Y=rbind(YC,YP)
 row.names(Y)=row.names(X)
+
 snv=as.data.frame(snv(X))
 
 #First or Second Derivative, to SNV or to raw data
-SGC=as.data.frame(savgol(snvC,2,17,2))
+Abs=as.data.frame(-log(XB))
+
+
+Average=colMeans(Abs)
+
+
 
 
 # Apply pretreatments
@@ -273,6 +279,61 @@ for (class in JoinSepals)
 
 
 
-
+  snvC=as.data.frame(snv(XC))
+  snvP=as.data.frame(snv(XP))
+  snvB=as.data.frame(snv(XB))
+  
+  #First or Second Derivative, to SNV or to raw data
+  SGC=as.data.frame(savgol(snvC,2,17,2))
+  SGP=as.data.frame(savgol(snvP,2,17,2))
+  SGB=as.data.frame(savgol(snvB,2,17,2))
+  
+  
+  
+  pcaC=prcomp(SGC, retx = TRUE, center = TRUE, scale. = TRUE, tol = NULL, rank.=8)
+  
+  pcaP=prcomp(SGP, retx = TRUE, center = TRUE, scale. = TRUE, tol = NULL, rank.=8)
+  
+  pcaB=prcomp(SGB, retx = TRUE, center = TRUE, scale. = TRUE, tol = NULL, rank.=8)
+  #summary(pca)
+  
+  
+  # Change colour of bar plot
+  c.pc1 <- ifelse(pcaC$rotation[,1] > 0, yes="green2", no="red2")
+  c.pc2 <- ifelse(pcaC$rotation[,2] > 0, "green2", "red2")
+  c.pc3 <- ifelse(pcaC$rotation[,3] > 0, "green2", "red2")
+  
+  
+  n.pc1 <- ifelse(pcaC$rotation[,1] > 0, yes=-0.0, no=pcaC$rotation[,1]-0.01)
+  n.pc2 <- ifelse(pcaC$rotation[,2] > 0, yes=-0.0, no=pcaC$rotation[,2]-0.01)
+  n.pc3 <- ifelse(pcaC$rotation[,3] > 0, yes=-0.0, no=pcaC$rotation[,3]-0.01)
+  
+  
+  cP.pc1 <- ifelse(pcaP$rotation[,1] > 0, yes="green2", no="red2")
+  cP.pc2 <- ifelse(pcaP$rotation[,2] > 0, "green2", "red2")
+  cP.pc3 <- ifelse(pcaP$rotation[,3] > 0, "green2", "red2")
+  
+  
+  nP.pc1 <- ifelse(pcaP$rotation[,1] > 0, yes=-0.0, no=pcaP$rotation[,1]-0.01)
+  nP.pc2 <- ifelse(pcaP$rotation[,2] > 0, yes=-0.0, no=pcaP$rotation[,2]-0.01)
+  nP.pc3 <- ifelse(pcaP$rotation[,3] > 0, yes=-0.0, no=pcaP$rotation[,3]-0.01)
+  
+  cB.pc1 <- ifelse(pcaB$rotation[,1] > 0, yes="green2", no="red2")
+  cB.pc2 <- ifelse(pcaB$rotation[,2] > 0, "green2", "red2")
+  cB.pc3 <- ifelse(pcaB$rotation[,3] > 0, "green2", "red2")
+  
+  
+  nB.pc1 <- ifelse(pcaB$rotation[,1] > 0, yes=-0.0, no=pcaB$rotation[,1]-0.01)
+  nB.pc2 <- ifelse(pcaB$rotation[,2] > 0, yes=-0.0, no=pcaB$rotation[,2]-0.01)
+  nB.pc3 <- ifelse(pcaB$rotation[,3] > 0, yes=-0.0, no=pcaB$rotation[,3]-0.01)
+  
+  
+  
+  
+  par(mar=c(14,9,13,9)) # Set margins
+  par(mfrow = c(1, 1))
+  barplot(pcaB$rotation[,1], main="PC 1, Brioso",cex.main=4, cex.axis=3, ylim = c(-0.2, 0.2), las=2, col=cB.pc1,cex.sub=2, cex.lab=2, cex.names=2)
+  
+  
   
   
