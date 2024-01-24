@@ -240,18 +240,24 @@ ggplot(LargeData, aes(x = Day, y = Intensity, color = as.factor(Temp))) +
        y = "Intensity",
        color = "Temp")+
   theme(
-    text = element_text(size = 12),  
+    text = element_text(size = 22),  
     title = element_text(size = 16),  
     axis.title = element_text(size = 20),  
     legend.text = element_text(size = 20)  )
 
 # Boxplot por Día
+
+
+LargeData$Day <- factor(LargeData$Day, levels = unique(LargeData$Day))
+
+LargeData$Temp <- factor(LargeData$Temp, levels = unique(LargeData$Temp))
+
 ggplot(LargeData, aes(x = factor(Day), y = Intensity, fill = as.factor(Temp))) +
   geom_boxplot() +
   labs(title = "Intensity variation per day",
        x = "Day",
        y = "Intensity",
-       fill = "Tempe")
+       fill = "Temp")
 
 library(ggplot2)
 
@@ -280,11 +286,13 @@ ggplot(LargeData, aes(x = factor(Day), y = Intensity, fill = as.factor(Temp))) +
        y = "Intensity",
        fill = "Temp") +
   theme(
-    text = element_text(size = 14),  # Tamaño del texto general
+    text = element_text(size = 24),  # Tamaño del texto general
     title = element_text(size = 18),  # Tamaño del título
     axis.title = element_text(size = 16),  # Tamaño de las etiquetas de ejes
     legend.text = element_text(size = 12)  # Tamaño del texto de la leyenda
   )
+
+
 modelo_no_lineal <- nls(Intensity ~ b0 + b1 * Day + b2 * Day^2, data = LargeData,
                         start = list(b0 = 0, b1 = 0, b2 = 0))
 summary(modelo_no_lineal)
@@ -314,4 +322,164 @@ model_mixed_lme <- lme(Intensity ~ Temp * Day, random = ~1 | Mass, data = LargeD
 
 # Model summary
 summary(model_mixed_lme)
+
+
+
+library(ggplot2)
+
+# Supongamos que tienes un conjunto de datos llamado 'datos' con las predicciones del modelo
+# Asegúrate de reemplazar 'datos' con el nombre real de tu conjunto de datos
+# Además, asumiré que 'Day' es una variable continua (no un factor)
+
+
+
+
+
+
+
+library(ggplot2)
+
+# Supongamos que tienes un conjunto de datos llamado 'LargeData' con las predicciones del modelo
+# Asegúrate de reemplazar 'LargeData' con el nombre real de tu conjunto de datos
+# Además, asumiré que 'Day' es una variable continua (no un factor)
+
+# Crear un gráfico de líneas para las curvas de intensidad
+ggplot(LargeData, aes(x = Day, y = Intensity, color = as.factor(Temp))) +
+  geom_line(size = 4) +
+  
+  # Agregar puntos para resaltar la diferencia
+  geom_point(data = subset(LargeData, Temp == 30), aes(x = Day, y = Intensity), color = "red", size = 2) +
+  
+  # Etiquetas y título
+  labs(title = "Differences in intensities between 15°C and 30°C",
+       x = "Day",
+       y = "Intensity",
+       color = "Temperature") +
+  
+  # Personalización opcional: tema y estilo
+  theme_minimal()+
+  theme(
+    text = element_text(size = 22),  
+    axis.text = element_text(size = 22),  
+    axis.title = element_text(size = 22)   
+  )
+
+
+# Instalar y cargar el paquete multcomp (si no está instalado)
+# install.packages("multcomp")
+library(multcomp)
+
+# Supongamos que tienes un modelo mixto llamado 'modelo_mixto_lme'
+# Asegúrate de reemplazar 'modelo_mixto_lme' con el nombre real de tu modelo
+# Además, asumiré que 'Day' es una variable continua (no un factor)
+
+# Realizar comparaciones específicas para ciertos días
+
+# Supongamos que 'datos' es tu conjunto de datos
+# Asegúrate de reemplazar 'datos' con el nombre real de tus datos
+
+
+
+
+# Supongamos que 'datos' es tu conjunto de datos
+# Asegúrate de reemplazar 'datos' con el nombre real de tus datos
+
+# Convertir 'Temp' a factor si aún no lo es
+LargeData$Temp <- as.factor(LargeData$Temp)
+
+model_mix_nlme <- lme(Intensity ~ Temp * Day, random = ~1 | Mass, data = LargeData)
+
+comparaciones_dia <- emmeans(model_mix_nlme, pairwise ~ Temp | Day)
+
+summary(comparaciones_dia)
+
+
+# Supongamos que tienes un modelo mixto llamado 'modelo_mixto_lme'
+# Asegúrate de reemplazar 'modelo_mixto_lme' con el nombre real de tu modelo
+# Además, asumiré que 'Day' es una variable continua (no un factor)
+
+# Ajustar el modelo con interacción entre Temperature y Day
+model_mix_nlme <- lme(Intensity ~ Temp * Day, random = ~1 | Mass, data = LargeData)
+
+# Realizar comparaciones específicas para cada día
+comparaciones_dia <- emmeans(model_mix_nlme, pairwise ~ Temp, by = "Day")
+
+
+
+# Mostrar resumen de comparaciones para cada día
+summary(comparaciones_dia)
+
+#######################################################################
+
+
+unique_days <- unique(LargeData$Day)
+
+# Lista para almacenar los resultados de las comparaciones
+comparation_results <- list()
+
+# Realizar comparaciones específicas para cada día
+for (day in unique_days) {
+  # Ajustar el modelo para el día específico
+  model_day <- lme(Intensity ~ Temp, random = ~1 | Mass, data = subset(LargeData, Day == day))
+  # Ajustar el modelo con un método de optimización diferente
+  #model_day <- lme(Intensity ~ Temp, random = ~1 | Mass, data = LargeData, control = lmeControl(opt = "nloptwrap"))
+  
+  model_day<- lme(Intensity ~ Temp, random = ~1 | Mass, data = LargeData, control = lmeControl(opt = "optim", optCtrl = list(method = "L-BFGS-B")))
+  
+  # Obtener las medias estimadas
+  means_day <- emmeans(model_day, ~ Temp)
+  
+  # Realizar comparaciones
+  comparations_day <- contrast(means_day, method = "pairwise")
+  
+  # Almacenar resultados en la lista
+  comparation_results[[as.character(day)]] <- comparations_day
+}
+
+# Mostrar resumen de comparaciones para cada día
+for (day in unique_days) {
+  cat("Summary for each day", day, ":\n")
+  print(comparation_results[[as.character(day)]])
+  cat("\n")
+}
+
+
+# Ajustar el modelo con el método "optim" y la variante "L-BFGS-B"
+modelo_mixto <- lme(Intensity ~ Temp, random = ~1 | Mass, data = LargeData, control = lmeControl(opt = "optim", optCtrl = list(method = "L-BFGS-B")))
+
+
+# Empiezo a comparar dia por dia
+LargeData=LargeData[1:128425, ]
+
+LargeData <- X %>%
+  pivot_longer(cols = -c(Name, Date, Day, Temp), names_to = "Mass", values_to = "Intensity")
+LargeData=LargeData[139816:170885, ]
+
+LargeData=LargeData[180446:188810, ]
+# Supongamos que 'LargeData' es tu conjunto de datos
+dias_unicos <- unique(LargeData$Day)
+
+# Lista para almacenar los resultados de las pruebas
+resultados_t_test <- list()
+
+# Realizar pruebas t para cada día
+for (dia in dias_unicos) {
+  # Subconjunto de datos para el día específico
+  subset_data <- subset(LargeData, Day == dia)
+  
+  # Realizar prueba t para las temperaturas 30 y 15 grados
+  resultado_t_test <- t.test(subset_data$Intensity[subset_data$Temp == 30], subset_data$Intensity[subset_data$Temp == 15])
+  
+  # Almacenar resultados en la lista
+  resultados_t_test[[as.character(dia)]] <- resultado_t_test
+}
+
+
+
+# Mostrar resumen de resultados
+for (dia in dias_unicos) {
+  cat("Summary for the day", dia, ":\n")
+  print(resultados_t_test[[as.character(dia)]])
+  cat("\n")
+}
 
