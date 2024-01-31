@@ -84,10 +84,10 @@ scale_by_row_sd <- function(data) {
 }
 
 # Apply Normalization 2
-Normalized.x2.2 <- scale_by_row_sd(x2.a)
-Normalized.x3.2 <- scale_by_row_sd(x3.a)
-Normalized.x4.2 <- scale_by_row_sd(x4.a)
-Normalized.x5.2 <- scale_by_row_sd(x5.a)
+Normalized.x2.2 <- as.data.frame(t(scale_by_row_sd(x2.a)))
+Normalized.x3.2 <- as.data.frame(t(scale_by_row_sd(x3.a)))
+Normalized.x4.2 <- as.data.frame(t(scale_by_row_sd(x4.a)))
+Normalized.x5.2 <- as.data.frame(t(scale_by_row_sd(x5.a)))
 ############################################################################################################################
 
 
@@ -96,10 +96,10 @@ Normalized.x5.2 <- scale_by_row_sd(x5.a)
 
 y2 <- unlist(y2)
 
-# Número máximo de componentes a considerar en el modelo
+# Max number of components to consider in the model
 max_nlv <- 9
 
-# Resultados de la validación cruzada
+# Cross Validation results
 cv_results <- matrix(NA, nrow = max_nlv, ncol = 2, 
                      dimnames = list(NULL, c("Error Rate", "Accuracy")))
 
@@ -108,20 +108,20 @@ for (i in 1:max_nlv) {
   # Entrenar modelo PLS-DA con i componentes
   fmD <- plsrda(Normalized.x5.1, y5, nlv = i)
   
-  # Realizar predicciones y evaluar rendimiento
+  # Make predictions and evaluate performances
   predictions <- predict(fmD, Normalized.x5.1)
   confusion_matrix <- table(predictions$pred, y5)
   
-  # Calcular error y precisión
+  # Calculate error and prediction
   error_rate <- 1 - sum(diag(confusion_matrix)) / sum(confusion_matrix)
   accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
   
-  # Almacenar resultados en la matriz
+  # Save results in the matrix
   cv_results[i, ] <- c(error_rate, accuracy)
 }
 
-# Mostrar resultados
-print("Resultados de la validación cruzada:")
+# Show results
+print("Cross validation results:")
 print(cv_results)
 print(confusion_matrix)
 
@@ -173,41 +173,4 @@ rownames(ComparativeTable) <- c("Accuracy", "Sensitivity", "Specificity", "Preci
 ComparativeTable
 
 #####################################################################################################################
-
-######################### ANOTHER PACKAGE TO COMPARE
-
-y2 = factor(y2, labels = c("Normal", "Unnormal"))
-y3 = factor(y3, labels = c("Normal", "Unnormal"))
-y4 = factor(y4, labels = c("Normal", "Unnormal"))
-y5 = factor(y5, labels = c("Normal", "Unnormal"))
-
-# PLSDA
-m = plsda(Normalized.x2.1, y2, ncomp = 20, ncomp.selcrit = "min", cv = 1)
-summary(m)
-plot(m)
-
-# Confusion Matrix
-getConfusionMatrix(m$calres)  
-
-par(mfrow = c(1, 2))
-plotPredictions(m)
-
-
-plotRegcoeffs(m, ncomp = 8)
-
-
-par(mfrow = c(2, 1))
-par(mar = c(5, 6, 4, 8))
-plotSensitivity(m, nc = 2, main = "Sensitivity vs LVs", xlab = "Number of components", ylab = "Sensitivity", cex.axis = 1.5, cex.main=1, cex.axis=1.5, cex.lab=2, cex.names=2)
-plotSpecificity(m, nc = 2, main = "Specificity vs LVs", xlab = "Number of components", ylab = "Specificity", cex.axis = 1.5, cex.main=1, cex.axis=1.5, cex.lab=2, cex.names=2)
-par(cex.axis = 1.5, cex.main=2, cex.axis=2, cex.lab=2, cex.names=2)
-
-
-
-
-barplot(pcaB$rotation[,1], main="PC 1, Brioso",cex.main=4, cex.axis=3, ylim = c(-0.2, 0.2), las=2, col=cB.pc1,cex.sub=2, cex.lab=2, cex.names=2)
-
-
-
-
 
